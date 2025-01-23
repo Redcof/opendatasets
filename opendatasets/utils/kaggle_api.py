@@ -33,7 +33,7 @@ def read_kaggle_creds():
         return False
 
 
-def download_kaggle_dataset(dataset_url, data_dir, force=False, dry_run=False):
+def download_kaggle_dataset(dataset_url, data_dir, force=False, dry_run=False, verify_ssl=True):
     dataset_id = get_kaggle_dataset_id(dataset_url)
     id = dataset_id.split('/')[1]
     target_dir = os.path.join(data_dir, id)
@@ -51,6 +51,10 @@ def download_kaggle_dataset(dataset_url, data_dir, force=False, dry_run=False):
     if not dry_run:
         from kaggle import api
         api.authenticate()
+        from kaggle import rest
+        api.api_client.configuration.verify_ssl = verify_ssl
+        api.api_client.rest_client = rest.RESTClientObject(api.api_client.configuration)
+        
         if dataset_id.split('/')[0] == 'competitions' or dataset_id.split('/')[0] == 'c':
             api.competition_download_files(
                 id,
